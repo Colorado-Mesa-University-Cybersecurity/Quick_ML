@@ -1,6 +1,22 @@
-# import analysis, cleaning, core, encoding, models, runners, topology, visualization
+'''
+This is the main entrance point for the Quick library by Colorado Mesa University's Cyber Security Center
+primary maintainer: James Halladay
 
-# import .analysis as analysis
+Submodules:
+    Analysis:
+    Cleaning:
+    Core:
+    Encoding:
+    Models:
+    Runners:
+    Topology:
+    Visualization:
+
+
+last updated: 2022-06-02
+'''
+
+
 from .analysis import *
 from .cleaning import *
 from .core import *
