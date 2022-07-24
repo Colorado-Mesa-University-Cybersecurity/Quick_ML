@@ -6,6 +6,19 @@ __pycache__/
 # C extensions
 *.so
 
+# CSV files
+*.csv
+
+# Arff files
+*.arff
+
+# Fastai models
+# *.model.pth
+
+# Pickle files for CSV caching
+*.csv.pickle
+*.pickle
+
 # Distribution / packaging
 .Python
 build/
