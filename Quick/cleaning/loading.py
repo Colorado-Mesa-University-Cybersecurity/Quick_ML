@@ -267,7 +267,6 @@ def prune_feature_by_values(df: pd.DataFrame, column: str, value: list) -> pd.Da
     return new_df
 
 
-
 def reduce_feature_to_values(df: pd.DataFrame, column: str, value: list) -> pd.DataFrame:
     '''
         Function takes a dataframe, a column name, and a list of values and returns a dataframe
@@ -278,7 +277,6 @@ def reduce_feature_to_values(df: pd.DataFrame, column: str, value: list) -> pd.D
         new_df = new_df.append(df[df[column] == v].copy())
 
     return new_df
-
 
 
 def test_infs(data_summary: ChainMap) -> bool:
@@ -292,7 +290,6 @@ def test_infs(data_summary: ChainMap) -> bool:
     
 
     return True
-
 
 
 def test_nans(data_summary: ChainMap) -> bool:
@@ -309,7 +306,6 @@ def test_nans(data_summary: ChainMap) -> bool:
     return True
 
 
-
 def test_pruned(data_summary: ChainMap, prune: list) -> bool:
     '''
         Function asserts the dataset has none of the columns present in the prune list 
@@ -324,7 +320,6 @@ def test_pruned(data_summary: ChainMap, prune: list) -> bool:
     assert pruned, 'Dataset has columns present in prune list'
 
     return pruned
-
 
 
 def test_pruned_size(data_summary_original: ChainMap, data_summary_pruned: ChainMap, prune: list) -> bool:
