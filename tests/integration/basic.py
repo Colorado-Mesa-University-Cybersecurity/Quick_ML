@@ -1,7 +1,7 @@
 '''
 Here we write tests that simply check to see if code is reachable from Quick/__init__.py
 '''
-from typing import List
+from typing import Callable, List
 import tunnel
 import Quick
 
@@ -29,13 +29,16 @@ def connection_tests():
     ]):
         print("Connection tests passed.")
 
-def run_tests(tests: List[callable]) -> bool:
+def run_tests(tests: List[Callable[[], bool]]) -> bool:
     
     passing = True
 
     for test in tests:
-        if not test():
+        try:
+            test()
+        except Exception as e:
             print(f"Test {test.__name__} failed.")
+            print(e)
             passing = False
 
     return passing
