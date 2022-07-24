@@ -1,5 +1,6 @@
 '''
-
+    File contains a wrapper for fastai models allowing them to be used 
+        by the yellowbrick visualization library
 '''
 
 import numpy as np
@@ -50,7 +51,7 @@ class SklearnWrapper(BaseEstimator):
 
 def import_versions() -> ChainMap:
     '''
-        Function will show the versions of the imports used in this file
+        Function will give a map of the versions of the imports used in this file
     '''
     versions: ChainMap = ChainMap({
         'numpy': f'\t\t{np.__version__}',
