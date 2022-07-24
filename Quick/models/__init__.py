@@ -1,8 +1,7 @@
 
 
 
-def basic_test_models():
+def test_connection_models():
     """
     """
-    print("Connected to the models module.")
     return True

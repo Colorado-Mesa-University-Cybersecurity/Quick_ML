@@ -1,8 +1,7 @@
 
 
 
-def basic_test_topology():
+def test_connection_topology():
     """
     """
-    print("Connected to the topology module.")
     return True

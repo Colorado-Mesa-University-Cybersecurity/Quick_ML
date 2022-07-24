@@ -1,8 +1,7 @@
 
 
 
-def basic_test_core():
+def test_connection_core():
     """
     """
-    print("Connected to the core module.")
     return True

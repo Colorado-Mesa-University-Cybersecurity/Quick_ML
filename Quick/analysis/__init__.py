@@ -1,8 +1,8 @@
 
 
 
-def basic_test_analysis():
+def test_connection_analysis():
     """
+    Test the connection analysis module.
     """
-    print("Connected to the analysis module.")
     return True

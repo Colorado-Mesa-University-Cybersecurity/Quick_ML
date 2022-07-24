@@ -1,8 +1,8 @@
 
 
 
-def basic_test_cleaning():
+def test_connection_cleaning():
     """
+    Test the connection cleaning module.
     """
-    print("Connected to the cleaning module.")
     return True

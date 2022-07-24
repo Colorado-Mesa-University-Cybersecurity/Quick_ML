@@ -1,8 +1,7 @@
 
 
 
-def basic_test_runners():
+def test_connection_runners():
     """
     """
-    print("Connected to the runners module.")
     return True
