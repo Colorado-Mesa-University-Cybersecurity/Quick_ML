@@ -8,6 +8,8 @@ import numpy as np
 
 from collections import ChainMap
 
+
+
 def get_file_path(directory: str):
     '''
         Closure that will return a function. 
@@ -18,7 +20,6 @@ def get_file_path(directory: str):
         return os.path.join(directory, file)
 
     return func
-
 
 
 def load_data(filePath):
@@ -45,7 +46,6 @@ def load_data(filePath):
         df.to_pickle(pickleDump)
     
     return df
-
 
 
 def features_with_bad_values(df: pd.DataFrame, datasetName: str) -> pd.DataFrame:
@@ -122,6 +122,7 @@ def clean_data(df: pd.DataFrame, prune: list) -> pd.DataFrame:
     return df
 
 
+
 def import_versions() -> ChainMap:
     '''
         Function will give a map of the versions of the imports used in this file
@@ -133,4 +134,3 @@ def import_versions() -> ChainMap:
 
     return versions
 
-    

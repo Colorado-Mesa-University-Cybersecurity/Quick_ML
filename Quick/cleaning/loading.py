@@ -2,6 +2,7 @@
 
 '''
 
+from typing import Callable
 import pandas as pd
 
 from collections import ChainMap
@@ -14,12 +15,13 @@ from .utils import (
 
 
 
-def examine_dataset(job_id: int, files: str or None = None, datasets: str or None = None) -> ChainMap:
+def examine_dataset(job_id: int, files: str, datasets: str) -> ChainMap:
     '''
-        Function will return a dictionary containing dataframe of the job_id passed in as well as that dataframe's
-        feature stats, data composition, and file name.
+        Function will return a chainmap dictionary containing dataframe of the job_id 
+            passed in as well as that dataframe's feature stats, data composition, 
+            and file name.
 
-        This dictionary is expected as the input for all of the other helper functions
+        This chainmap is expected as the input for all of the other helper functions
     '''
     # if files is None and 'file_set' in tuple(globals()):
     #     files = file_set
@@ -59,6 +61,17 @@ def examine_dataset(job_id: int, files: str or None = None, datasets: str or Non
     return data_summary
 
 
+def dataset_loader(files: str, datasets: str) -> Callable[[int], ChainMap]:
+    '''
+        Function will return a function that will load the dataset and return a dictionary containing the dataframe and
+        the feature stats.
+    '''
+
+    def load_dataset(job_id: int) -> ChainMap:
+        return examine_dataset(job_id, files, datasets)
+
+    return load_dataset
+
 
 def package_data_for_inspection(df: pd.DataFrame) -> ChainMap:
     '''
@@ -74,7 +87,6 @@ def package_data_for_inspection(df: pd.DataFrame) -> ChainMap:
         Samples:\t\t\t{df.shape[0]} 
         Features:\t\t\t{df.shape[1]}
     ''')
-    
 
     # return the dataframe and the feature stats
     data_summary: ChainMap =  ChainMap({
@@ -84,7 +96,6 @@ def package_data_for_inspection(df: pd.DataFrame) -> ChainMap:
     })
     
     return data_summary
-
 
 
 def package_data_for_inspection_with_label(df: pd.DataFrame, label: str) -> ChainMap:
@@ -113,72 +124,6 @@ def package_data_for_inspection_with_label(df: pd.DataFrame, label: str) -> Chai
     return data_summary
 
 
-
-def check_infs(data_summary: ChainMap) -> pd.DataFrame:
-    '''
-        Function will return a dataframe of features with a value of Inf.
-    '''
-
-    
-    vals: pd.DataFrame = data_summary['Feature_stats']
-    inf_df = vals[vals['Value'] == 'Inf'].T
-
-    return inf_df[inf_df[0] != 0]
-
-
-
-def check_nans(data_summary: ChainMap) -> pd.DataFrame:
-    '''
-        Function will return a dataframe of features with a value of NaN.
-    '''
-
-    vals: pd.DataFrame = data_summary['Feature_stats']
-    nan_df = vals[vals['Value'] == 'NaN'].T
-
-    return nan_df[nan_df[1] != 0]
-
-
-
-def check_zeros(data_summary: ChainMap) -> pd.DataFrame:
-    '''
-        Function will return a dataframe of features with a value of 0.
-    '''
-
-    vals: pd.DataFrame = data_summary['Feature_stats']
-    zero_df = vals[vals['Value'] == 'Zero'].T
-
-    return zero_df[zero_df[2] != 0]
-
-
-
-def check_zeros_over_threshold(data_summary: ChainMap, threshold: int) -> pd.DataFrame:
-    '''
-        Function will return a dataframe of features with a value of 0.
-    '''
-
-    vals: pd.DataFrame = data_summary['Feature_stats']
-    zero_df = vals[vals['Value'] == 'Zero'].T
-    zero_df_bottom = zero_df[2:]
-
-    return zero_df_bottom[zero_df_bottom[2] > threshold]
-
-
-
-def check_zeros_over_threshold_percentage(data_summary: ChainMap, threshold: float) -> pd.DataFrame:
-    '''
-        Function will return a dataframe of features with all features with
-        a frequency of 0 values greater than the threshold
-    '''
-
-    vals: pd.DataFrame = data_summary['Feature_stats']
-    size: int = data_summary['Dataset'].shape[0]
-    zero_df = vals[vals['Value'] == 'Zero'].T
-    zero_df_bottom = zero_df[2:]
-
-    return zero_df_bottom[zero_df_bottom[2] > threshold*size]
-
-
-
 def remove_infs_and_nans(data_summary: ChainMap) -> pd.DataFrame:
     '''
         Function will return the dataset with all inf and nan values removed.
@@ -188,7 +133,6 @@ def remove_infs_and_nans(data_summary: ChainMap) -> pd.DataFrame:
     df = clean_data(df, [])
 
     return df
-
 
 
 def rename_columns(data_summary: ChainMap, columns: list, new_names: list) -> ChainMap:
@@ -203,7 +147,6 @@ def rename_columns(data_summary: ChainMap, columns: list, new_names: list) -> Ch
     out: dict = {'Dataset': df}
 
     return data_summary.new_child(out)
-
 
 
 def rename_values_in_column(data_summary: ChainMap, replace: list) -> pd.DataFrame:
@@ -222,7 +165,6 @@ def rename_values_in_column(data_summary: ChainMap, replace: list) -> pd.DataFra
     return df
 
 
-
 def rename_values_in_column_df(df: pd.DataFrame, replace: list) -> pd.DataFrame:
     '''
         Function will return a dataframe with the names of the columns changed
@@ -239,103 +181,6 @@ def rename_values_in_column_df(df: pd.DataFrame, replace: list) -> pd.DataFrame:
     return df1
 
 
-
-def prune_dataset(data_summary: ChainMap, prune: list) -> pd.DataFrame:
-    '''
-        Function will return the dataset with all the columns in the prune list removed.
-    '''
-
-    df: pd.DataFrame = data_summary['Dataset'].copy()
-    df = clean_data(df, prune)
-
-    return df
-
-
-
-def prune_feature_by_values(df: pd.DataFrame, column: str, value: list) -> pd.DataFrame:
-    '''
-        Function takes a dataframe, a column name, and a list of values and returns a dataframe
-        with all rows that do not have the values in the column removed
-
-        Deprecated, use reduce_feature_to_values:
-            ambiguous name implied it is removing values, not keeping them
-    '''
-    new_df = pd.DataFrame()
-    for v in value:
-        new_df = new_df.append(df[df[column] == v].copy())
-
-    return new_df
-
-
-def reduce_feature_to_values(df: pd.DataFrame, column: str, value: list) -> pd.DataFrame:
-    '''
-        Function takes a dataframe, a column name, and a list of values and returns a dataframe
-        with all rows that do not have the values in the column removed
-    '''
-    new_df = pd.DataFrame()
-    for v in value:
-        new_df = new_df.append(df[df[column] == v].copy())
-
-    return new_df
-
-
-def test_infs(data_summary: ChainMap) -> bool:
-    '''
-        Function asserts the dataset has no inf values.
-    '''
-    vals: pd.DataFrame = data_summary['Feature_stats']
-    inf_df = vals[vals['Value'] == 'Inf'].T
-
-    assert inf_df[inf_df[0] != 0].shape[0] == 2, 'Dataset has inf values'
-    
-
-    return True
-
-
-def test_nans(data_summary: ChainMap) -> bool:
-    '''
-        Function asserts the dataset has no NaN values
-    '''
-
-    vals: pd.DataFrame = data_summary['Feature_stats']
-    nan_df = vals[vals['Value'] == 'NaN'].T
-
-    assert nan_df[nan_df[1] != 0].shape[0] == 2, 'Dataset has NaN values'
-
-
-    return True
-
-
-def test_pruned(data_summary: ChainMap, prune: list) -> bool:
-    '''
-        Function asserts the dataset has none of the columns present in the prune list 
-    '''
-
-    pruned: bool = True
-
-    for col in prune:
-        if col in data_summary['Dataset'].columns:
-            pruned = False
-
-    assert pruned, 'Dataset has columns present in prune list'
-
-    return pruned
-
-
-def test_pruned_size(data_summary_original: ChainMap, data_summary_pruned: ChainMap, prune: list) -> bool:
-    '''
-        Function asserts the dataset has none of the columns present in the prune list 
-    '''
-
-    original_size: int = data_summary_original['Dataset'].shape[1]
-    pruned_size: int = data_summary_pruned['Dataset'].shape[1]
-    prune_list_size: int = len(prune)
-
-    assert original_size - prune_list_size == pruned_size, 'Dataset has columns present in prune list'
-
-    return True
-
-    
 
 def import_versions() -> ChainMap:
     '''
