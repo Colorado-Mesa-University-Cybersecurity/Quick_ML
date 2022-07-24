@@ -5,9 +5,6 @@ from typing import List
 import tunnel
 import Quick
 
-
-
-
 from Quick.analysis import *
 from Quick.cleaning import *
 from Quick.core import *
@@ -42,8 +39,6 @@ def run_tests(tests: List[callable]) -> bool:
             passing = False
 
     return passing
-
-
 
 if(__name__ == "__main__"):
     connection_tests()
