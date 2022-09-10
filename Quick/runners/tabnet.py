@@ -52,12 +52,16 @@ from .utils import (
     create_feature_sets,
     create_splits_from_tabular_object,
     get_classes_from_dls,
-    get_target_type
+    get_target_type,
+    run_model
 )
 
 from .wrappers import SklearnWrapper
 
 from ..constants.runners import (
+    DEFAULT_CALLBACKS,
+    DEFAULT_PROCS,
+    FLAT_COS,
     LEARNING_RATE_OPTIONS,
     VALLEY
 )
@@ -77,7 +81,7 @@ def run_tabnet_experiment(
     split: float = 0.2, 
     name: str or None = None,
     categorical: list = ['Protocol'],
-    procs = [FillMissing, Categorify, Normalize], 
+    procs = DEFAULT_PROCS, 
     leave_out: list = [],
     epochs: int = 10,
     steps: int = 1,
@@ -85,9 +89,9 @@ def run_tabnet_experiment(
     metrics: list or None = None,
     attention_size: int = 16,
     attention_width: int = 16,
-    callbacks: list = [ShowGraphCallback],
+    callbacks: list = DEFAULT_CALLBACKS,
     lr_choice: str = VALLEY,
-    fit_choice: str = 'flat_cos',
+    fit_choice: str = FLAT_COS,
     no_bar: bool = False
 ) -> Model_data or ModelData:
     '''
@@ -140,8 +144,6 @@ def run_tabnet_experiment(
     if name is None:
         name = f"TabNet_steps_{steps}_width_{attention_width}_attention_{attention_size}"
 
-    lr_choice: int = LEARNING_RATE_OPTIONS[lr_choice]
-
     categorical_features, continuous_features = create_feature_sets(
         df, 
         target_label, 
@@ -179,27 +181,18 @@ def run_tabnet_experiment(
     net = TabNet(emb_szs, len(to.cont_names), dls.c, n_d=attention_width, n_a=attention_size, n_steps=steps) 
     tab_model = Learner(dls, net, loss_func=CrossEntropyLossFlat(), metrics=metrics, opt_func=ranger, cbs=callbacks)
 
-    with tab_model.no_bar() if no_bar else contextlib.ExitStack() as gs:
+    # extract the file_name from the path
+    p = pathlib.Path(file_name)
+    file_name: str = str(p.parts[-1])
 
-        lr = tab_model.lr_find(suggest_funcs=[valley, slide, steep, minimum])
-
-        # fitting functions, they give different results, some networks perform better with different learning schedule during fitting
-        if(fit_choice == 'fit'):
-            tab_model.fit(epochs, lr[lr_choice])
-        elif(fit_choice == 'flat_cos'):
-            tab_model.fit_flat_cos(epochs, lr[lr_choice])
-        elif(fit_choice == 'one_cycle'):
-            tab_model.fit_one_cycle(epochs, lr_max=lr[lr_choice])
-        else:
-            assert False, f'{fit_choice} is not a valid fit_choice'
-
-        tab_model.recorder.plot_sched() 
-        results = tab_model.validate()
-        interp = ClassificationInterpretation.from_learner(tab_model)
-        interp.plot_confusion_matrix()
-
-    print(f'loss: {results[0]}, accuracy: {results[1]*100: .2f}%')
-    tab_model.save(f'{file_name}.model')
+    tab_model = run_model(
+        file_name,
+        tab_model,
+        epochs,
+        no_bar,
+        lr_choice,
+        fit_choice
+    )
 
     # we add a target_type_ attribute to our model so yellowbrick knows how to make the visualizations
     classes = get_classes_from_dls(dls)
@@ -208,10 +201,6 @@ def run_tabnet_experiment(
     wrapped_model.target_type_ = get_target_type(classes)
     wrapped_model._target_labels = target_label
     
-    # extract the file_name from the path
-    p = pathlib.Path(file_name)
-    file_name: str = str(p.parts[-1])
-
     model_data: Model_data = Model_data(
         file_name, 
         wrapped_model, 

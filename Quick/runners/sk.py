@@ -25,7 +25,9 @@ from fastai.tabular.all import (
 from sklearn.metrics import (
     accuracy_score, 
     classification_report
-) 
+)
+
+from Quick.constants.runners import DEFAULT_PROCS 
 
 from .utils import (
     create_dataloaders,
@@ -50,7 +52,7 @@ def run_sk_experiment(
     split: float = 0.2,
     batch_size: int = 64, 
     categorical : list = ['Protocol'], 
-    procs = [FillMissing, Categorify, Normalize], 
+    procs = DEFAULT_PROCS, 
     name: str or None = None,
     leave_out: list = [], 
     model = KNeighborsClassifier()
@@ -99,7 +101,7 @@ def run_sk_experiment(
     # extract the name from the path
     p = pathlib.Path(file_name)
     file_name: str = str(p.parts[-1])
-    
+
     model_data: Model_data = Model_data(
         file_name, 
         model, 

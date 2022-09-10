@@ -2,6 +2,7 @@
 
 '''
 
+import contextlib
 import fastai
 import pandas as pd
 
@@ -10,6 +11,7 @@ from collections import ChainMap
 from fastai.data.all import DataLoaders
 
 from fastai.tabular.all import (
+    ClassificationInterpretation, 
     RandomSplitter,
     TabularPandas,
     range_of,
@@ -17,6 +19,15 @@ from fastai.tabular.all import (
 )
 
 from ..constants.random import SEED
+
+from ..constants.runners import (
+    DEFAULT_LR_FUNCS, 
+    FIT, 
+    FLAT_COS, 
+    LEARNING_RATE_OPTIONS, 
+    ONE_CYCLE
+)
+
 
 
 def create_feature_sets(
@@ -125,6 +136,47 @@ def get_target_type(classes: list, allow_single = False) -> str:
             raise ValueError('Wrong number of classes')
 
     return target_type_
+
+
+def run_model(
+    file_name: str,
+    learner,
+    epochs: int,
+    no_bar: bool,
+    lr_choice: str,
+    fit_choice: str,
+    lr_funcs: list = DEFAULT_LR_FUNCS
+):
+    '''
+        Function will run the model
+    '''
+
+    lr_choice: int = LEARNING_RATE_OPTIONS[lr_choice]
+    
+
+    with learner.no_bar() if no_bar else contextlib.ExitStack() as gs:
+
+        lr = learner.lr_find(suggest_funcs=lr_funcs)
+
+            # fitting functions, they give different results, some networks perform better with different learning schedule during fitting
+        if(fit_choice == FIT):
+            learner.fit(epochs, lr[lr_choice])
+        elif(fit_choice == FLAT_COS):
+            learner.fit_flat_cos(epochs, lr[lr_choice])
+        elif(fit_choice == ONE_CYCLE):
+            learner.fit_one_cycle(epochs, lr_max=lr[lr_choice])
+        else:
+            assert False, f'{fit_choice} is not a valid fit_choice'
+
+        learner.recorder.plot_sched() 
+        results = learner.validate()
+        interp = ClassificationInterpretation.from_learner(learner)
+        interp.plot_confusion_matrix()
+                
+    print(f'loss: {results[0]}, accuracy: {results[1]*100: .2f}%')
+    learner.save(f'{file_name}.model')
+
+    return learner
 
 
 

@@ -39,13 +39,17 @@ from .utils import (
     create_feature_sets,
     create_splits_from_tabular_object,
     get_classes_from_dls,
-    get_target_type
+    get_target_type,
+    run_model
 )
 
 from .wrappers import SklearnWrapper
 
 from ..constants.runners import (
+    DEFAULT_CALLBACKS,
+    DEFAULT_PROCS,
     LEARNING_RATE_OPTIONS,
+    ONE_CYCLE,
     VALLEY
 )
 
@@ -65,15 +69,15 @@ def run_residual_deep_nn_experiment(
     shape: tuple, 
     split: float = 0.2, 
     categorical: list = ['Protocol'],
-    procs = [FillMissing, Categorify, Normalize], 
+    procs = DEFAULT_PROCS, 
     leave_out: list = [],
     epochs: int = 10,
     batch_size: int = 64,
     metrics: list or None = None,
-    callbacks: list = [ShowGraphCallback],
+    callbacks: list = DEFAULT_CALLBACKS,
     lr_choice: str = VALLEY,
     name: str or None = None,
-    fit_choice: str = 'one_cycle',
+    fit_choice: str = ONE_CYCLE,
     cardinality: list or None = None,
     no_bar: bool = False
 ) -> Model_data or ModelData:
@@ -128,8 +132,6 @@ def run_residual_deep_nn_experiment(
             width = x if (x > width) else width
         name = f'Residual_1D_Deep_NN_{len(shape)}x{width}'
 
-    lr_choice: int = LEARNING_RATE_OPTIONS[lr_choice]
-
     categorical_features, continuous_features = create_feature_sets(
         df, 
         target_label, 
@@ -170,27 +172,18 @@ def run_residual_deep_nn_experiment(
         cardinality=cardinality
     )
 
-    with learner.no_bar() if no_bar else contextlib.ExitStack() as gs:
+    # extract the file_name from the path
+    p = pathlib.Path(file_name)
+    file_name: str = str(p.parts[-1])
 
-        lr = learner.lr_find(suggest_funcs=[valley, slide, steep, minimum])
-
-            # fitting functions, they give different results, some networks perform better with different learning schedule during fitting
-        if(fit_choice == 'fit'):
-            learner.fit(epochs, lr[lr_choice])
-        elif(fit_choice == 'flat_cos'):
-            learner.fit_flat_cos(epochs, lr[lr_choice])
-        elif(fit_choice == 'one_cycle'):
-            learner.fit_one_cycle(epochs, lr_max=lr[lr_choice])
-        else:
-            assert False, f'{fit_choice} is not a valid fit_choice'
-
-        learner.recorder.plot_sched() 
-        results = learner.validate()
-        interp = ClassificationInterpretation.from_learner(learner)
-        interp.plot_confusion_matrix()
-                
-    print(f'loss: {results[0]}, accuracy: {results[1]*100: .2f}%')
-    learner.save(f'{file_name}.model')
+    learner = run_model(
+        file_name,
+        learner,
+        epochs,
+        no_bar,
+        lr_choice,
+        fit_choice
+    )
 
     # we add a target_type_ attribute to our model so yellowbrick knows how to make the visualizations
     classes = get_classes_from_dls(dls)
@@ -199,10 +192,6 @@ def run_residual_deep_nn_experiment(
     wrapped_model.target_type_ = get_target_type(classes)
     wrapped_model._target_labels = target_label
     
-    # extract the file_name from the path
-    p = pathlib.Path(file_name)
-    file_name: str = str(p.parts[-1])
-
     model_data: Model_data = Model_data(
         file_name, 
         wrapped_model, 
