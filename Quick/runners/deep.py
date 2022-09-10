@@ -31,10 +31,7 @@ from fastai.tabular.all import (
     ClassificationInterpretation, 
     FillMissing, 
     Normalize,
-    RandomSplitter,
-    TabularPandas,
     accuracy,
-    range_of,
     tabular_learner
 )
 

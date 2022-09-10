@@ -31,19 +31,23 @@ from fastai.tabular.all import (
     ClassificationInterpretation, 
     FillMissing, 
     Normalize,
-    RandomSplitter,
-    TabularPandas,
-    accuracy,
-    range_of
+    accuracy
 )
 
 from .utils import (
-    create_feature_sets
+    create_dataloaders,
+    create_feature_sets,
+    create_splits_from_tabular_object,
+    get_classes_from_dls,
+    get_target_type
 )
 
 from .wrappers import SklearnWrapper
 
-from ..constants.random import SEED
+from ..constants.runners import (
+    LEARNING_RATE_OPTIONS,
+    VALLEY
+)
 
 from ..datatypes.model import (
     Model_data,
@@ -67,7 +71,7 @@ def run_residual_deep_nn_experiment(
     batch_size: int = 64,
     metrics: list or None = None,
     callbacks: list = [ShowGraphCallback],
-    lr_choice: str = 'valley',
+    lr_choice: str = VALLEY,
     name: str or None = None,
     fit_choice: str = 'one_cycle',
     cardinality: list or None = None,
@@ -122,10 +126,7 @@ def run_residual_deep_nn_experiment(
             width = x if (x > width) else width
         name = f'Residual_1D_Deep_NN_{len(shape)}x{width}'
 
-    lr_choice = {'valley': 0, 'slide': 1, 'steep': 2, 'minimum': 3}[lr_choice]
-
-    if metrics is None:
-        metrics = [accuracy, BalancedAccuracy(), RocAuc(), MatthewsCorrCoef(), F1Score(average='macro'), Precision(average='macro'), Recall(average='macro')]
+    lr_choice: int = LEARNING_RATE_OPTIONS[lr_choice]
 
     categorical_features, continuous_features = create_feature_sets(
         df, 
@@ -134,27 +135,30 @@ def run_residual_deep_nn_experiment(
         categorical = categorical
     )
 
-    splits = RandomSplitter(valid_pct=split, seed=SEED)(range_of(df))
-    
-
-    # The dataframe is loaded into a fastai datastructure now that 
-    # the feature engineering pipeline has been set up
-    to = TabularPandas(
-        df            , y_names=target_label                , 
-        splits=splits , cat_names=categorical_features ,
-        procs=procs   , cont_names=continuous_features , 
+    dls = create_dataloaders(
+        df,
+        target_label,
+        categorical_features,
+        continuous_features,
+        procs,
+        batch_size,
+        split
     )
+    
+    to = dls.tabular_object
 
-    # The dataframe is then converted into a fastai dataset
-    try:
-        dls = to.dataloaders(bs=batch_size)
-    except:
-        dls = to
+    X_train, X_test, y_train, y_test = create_splits_from_tabular_object(to)
 
-    # extract the file_name from the path
-    p = pathlib.Path(file_name)
-    file_name: str = str(p.parts[-1])
-
+    if metrics is None:
+        metrics = [
+            accuracy, 
+            BalancedAccuracy(), 
+            RocAuc(), 
+            MatthewsCorrCoef(), 
+            F1Score(average='macro'), 
+            Precision(average='macro'), 
+            Recall(average='macro')
+        ]
 
     learner = residual_tabular_learner(
         dls, 
@@ -163,7 +167,6 @@ def run_residual_deep_nn_experiment(
         cbs=callbacks,
         cardinality=cardinality
     )
-
 
     with learner.no_bar() if no_bar else contextlib.ExitStack() as gs:
 
@@ -188,27 +191,29 @@ def run_residual_deep_nn_experiment(
     print(f'loss: {results[0]}, accuracy: {results[1]*100: .2f}%')
     learner.save(f'{file_name}.model')
 
-
-    X_train = to.train.xs.reset_index(drop=True)
-    X_test = to.valid.xs.reset_index(drop=True)
-    y_train = to.train.ys.values.ravel()
-    y_test = to.valid.ys.values.ravel()
-
+    # we add a target_type_ attribute to our model so yellowbrick knows how to make the visualizations
+    classes = get_classes_from_dls(dls)
     wrapped_model = SklearnWrapper(learner)
 
-    classes = list(learner.dls.vocab)
-    if len(classes) == 2:
-        wrapped_model.target_type_ = 'binary'
-    elif len(classes) > 2:  
-        wrapped_model.target_type_ = 'multiclass'
-    else:
-        print('Must be more than one class to perform classification')
-        raise ValueError('Wrong number of classes')
-    
+    wrapped_model.target_type_ = get_target_type(classes)
     wrapped_model._target_labels = target_label
     
-    model_data: Model_data = Model_data(file_name, wrapped_model, classes, X_train, y_train, X_test, y_test, to, dls, name)
+    # extract the file_name from the path
+    p = pathlib.Path(file_name)
+    file_name: str = str(p.parts[-1])
 
+    model_data: Model_data = Model_data(
+        file_name, 
+        wrapped_model, 
+        classes, 
+        X_train, 
+        y_train, 
+        X_test, 
+        y_test, 
+        to, 
+        dls, 
+        name
+    )
 
     return model_data
 
