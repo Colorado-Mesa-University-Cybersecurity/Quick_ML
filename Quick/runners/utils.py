@@ -108,7 +108,7 @@ def get_classes_from_dls(dls: DataLoaders) -> list:
     return list(temp_model.dls.vocab)
 
 
-def get_target_type(classes: list) -> str:
+def get_target_type(classes: list, allow_single = False) -> str:
     '''
         Function will return the type of classification problem
     '''
@@ -118,8 +118,11 @@ def get_target_type(classes: list) -> str:
     elif len(classes) > 2:  
         target_type_ = 'multiclass'
     else:
-        print('Must be more than one class to perform classification')
-        raise ValueError('Wrong number of classes')
+        if allow_single:
+            target_type_ = 'single'
+        else:
+            print('Must be more than one class to perform classification')
+            raise ValueError('Wrong number of classes')
 
     return target_type_
 

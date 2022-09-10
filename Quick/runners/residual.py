@@ -118,6 +118,8 @@ def run_residual_deep_nn_experiment(
         returns a model data named tuple
             model_data: tuple = (file_name, model, classes, X_train, y_train, X_test, y_test, model_type)
     '''
+
+    print(f"Shape of Input Data: {df.shape}")
     shape = tuple(shape)
 
     if name is None:

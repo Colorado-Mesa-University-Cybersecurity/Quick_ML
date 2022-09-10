@@ -135,6 +135,8 @@ def run_tabnet_experiment(
         model_data: tuple = (file_name, model, classes, X_train, y_train, X_test, y_test, model_type)
     '''
 
+    print(f"Shape of Input Data: {df.shape}")
+
     if name is None:
         name = f"TabNet_steps_{steps}_width_{attention_width}_attention_{attention_size}"
 
