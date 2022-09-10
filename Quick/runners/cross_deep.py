@@ -5,6 +5,7 @@
 import pathlib
 
 import fastai
+import numpy as np
 import pandas as pd
 
 from collections import ChainMap
@@ -177,9 +178,17 @@ def run_cross_validated_deep_nn_experiment(
             experiment_type
         )
 
+    results: dict = {}
+    avg_results: dict = {}
+
+    for key, item in fold_results.items():
+        results[key] = tuple(item)
+        avg_results[key] = np.mean(item)
+
     model_datum: Model_datum = Model_datum(
         tuple(model_data_list), 
-        fold_results
+        fold_results,
+        avg_results
     )
 
     return model_datum

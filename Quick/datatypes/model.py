@@ -87,7 +87,8 @@ Model_datum = namedtuple(
     'Model_datum', 
     [
         'models', # A list of Model_data objects
-        'results' # A dictionary of results by metric
+        'results', # A dictionary of results by metric
+        'avg_results' # A dictionary of average results by metric
     ]
 )
 
