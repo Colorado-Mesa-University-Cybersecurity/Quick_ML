@@ -6,7 +6,6 @@ import numpy as np
 
 from collections import ChainMap
 
-# unary functions
 
 def clamp_to_0_1(x):
     return max(min(x, 1), 0)
@@ -60,34 +59,6 @@ def curve_over_x_1(x):
 
 def curve_over_x_2(x):
     return -(x - 1)*(x - 1) + 1
-
-
-# binary functions / operations
-# _ precedes names to prevent name conflicts
-
-def _dist_l1(x, y):
-    return np.abs(x - y)
-
-def _dist_l2(x, y):
-    return np.sqrt(np.power(x, 2) + np.power(y, 2))
-
-def _avg(x, y):
-    return (x + y) / 2
-
-def _mult(x, y):
-    return x * y
-
-def _add(x, y):
-    return x + y
-
-def _rbf_l1(x, y):
-    '''radial basis function'''
-    return np.exp(-_dist_l1(x, y)**2)
-
-def _rbf_l2(x, y):
-    '''radial basis function'''
-    return np.exp(-_dist_l2(x, y)**2)
-
 
 # closures allowing customizable functions
 

@@ -192,3 +192,17 @@ def run_cross_validated_deep_nn_experiment(
     )
 
     return model_datum
+
+
+def import_versions() -> ChainMap:
+    '''
+        Function will give a map of the versions of the imports used in this file
+    '''
+    versions: ChainMap = ChainMap({
+        'fastai': f'\t\t{fastai.__version__}',
+        'numpy': f'\t\t{np.__version__}',
+        'pandas': f'\t\t{pd.__version__}'
+    })
+
+    return versions
+

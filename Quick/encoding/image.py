@@ -4,7 +4,7 @@ import numpy as np
 
 from collections import ChainMap
 
-from .math import clamp_to_0_1
+from .unary import clamp_to_0_1
 
 def produce_single_channel_image_matrix(
     df_sample: pd.DataFrame, 
