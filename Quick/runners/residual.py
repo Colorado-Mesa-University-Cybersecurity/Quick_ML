@@ -192,8 +192,6 @@ def run_residual_deep_nn_experiment(
     return model_data
 
 
-
-
 def import_versions() -> ChainMap:
     '''
         Function will give a map of the versions of the imports used in this file
