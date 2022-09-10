@@ -12,6 +12,7 @@ from fastai.data.all import DataLoaders
 
 from fastai.tabular.all import (
     ClassificationInterpretation, 
+    IndexSplitter,
     RandomSplitter,
     TabularPandas,
     range_of,
@@ -94,6 +95,40 @@ def create_dataloaders(
     return dls
 
 
+def create_cv_dataloaders(
+    df: pd.DataFrame,
+    target_label: str,
+    categorical_features: list,
+    continuous_features: list,
+    procs: list,
+    batch_size: int,
+    test_splits
+) -> tuple:
+    '''
+        Function will create the data loaders for the experiment
+    '''
+
+    splits = IndexSplitter(test_splits)(df)
+
+    to = TabularPandas(
+        df, 
+        procs=procs, 
+        cat_names=categorical_features, 
+        cont_names=continuous_features, 
+        y_names=target_label, 
+        splits=splits
+    )
+
+    try:
+        dls = to.dataloaders(bs=batch_size)
+    except:
+        dls = to
+
+    dls.tabular_object = to
+
+    return dls
+
+
 def create_splits_from_tabular_object(to: TabularPandas) -> tuple:
     '''
         Function will create the splits from the tabular object
@@ -138,7 +173,7 @@ def get_target_type(classes: list, allow_single = False) -> str:
 
 
 def run_model(
-    file_name: str,
+    name: str,
     learner,
     epochs: int,
     no_bar: bool,
@@ -171,11 +206,10 @@ def run_model(
         results = learner.validate()
         interp = ClassificationInterpretation.from_learner(learner)
         interp.plot_confusion_matrix()
-                
-    print(f'loss: {results[0]}, accuracy: {results[1]*100: .2f}%')
-    learner.save(f'{file_name}.model')
 
-    return learner
+    learner.save(f'{name}.model')
+
+    return learner, results
 
 
 def import_versions() -> ChainMap:

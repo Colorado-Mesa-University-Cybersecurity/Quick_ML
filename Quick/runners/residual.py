@@ -149,14 +149,16 @@ def run_residual_deep_nn_experiment(
     p = pathlib.Path(file_name)
     file_name: str = str(p.parts[-1])
 
-    learner = run_model(
-        file_name,
+    learner, results = run_model(
+        name,
         learner,
         epochs,
         no_bar,
         lr_choice,
         fit_choice
     )
+
+    print(f'loss: {results[0]}, accuracy: {results[1]*100: .2f}%')
 
     # we add a target_type_ attribute to our model so yellowbrick knows how to make the visualizations
     classes = get_classes_from_dls(dls)
