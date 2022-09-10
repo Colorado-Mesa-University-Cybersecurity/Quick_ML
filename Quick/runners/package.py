@@ -9,12 +9,9 @@ import pandas as pd
 
 from collections import ChainMap
 
-from fastai.tabular.all import (
-    Categorify,
-    FillMissing, 
-    Normalize,
-    tabular_learner
-)
+from fastai.tabular.all import tabular_learner
+
+from ..constants.runners import DEFAULT_PROCS
 
 from .utils import (
     create_dataloaders,
@@ -38,7 +35,7 @@ def transform_and_split_data(
     name: str or None = None, 
     batch_size: int = 64,
     categorical : list = ['Protocol'], 
-    procs = [FillMissing, Categorify, Normalize],
+    procs = DEFAULT_PROCS,
     leave_out: list = []
 ) -> Model_data or ModelData:
     '''
