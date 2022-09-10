@@ -7,10 +7,20 @@ from fastai.callback.all import (
     valley
 )
 
+from fastai.metrics import (
+    BalancedAccuracy,
+    F1Score,
+    MatthewsCorrCoef,
+    Precision,
+    Recall,
+    RocAuc
+)
+
 from fastai.tabular.all import (
     Categorify,
     FillMissing,
-    Normalize
+    Normalize,
+    accuracy
 )
 
 
@@ -47,3 +57,12 @@ DEFAULT_LR_FUNCS: list = [
     minimum
 ]
 
+DEFAULT_METRICS: list = [
+    accuracy, 
+    BalancedAccuracy(), 
+    RocAuc(), 
+    MatthewsCorrCoef(), 
+    F1Score(average='macro'), 
+    Precision(average='macro'), 
+    Recall(average='macro')
+]

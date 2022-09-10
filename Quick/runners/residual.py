@@ -137,17 +137,6 @@ def run_residual_deep_nn_experiment(
 
     X_train, X_test, y_train, y_test = create_splits_from_tabular_object(to)
 
-    if metrics is None:
-        metrics = [
-            accuracy, 
-            BalancedAccuracy(), 
-            RocAuc(), 
-            MatthewsCorrCoef(), 
-            F1Score(average='macro'), 
-            Precision(average='macro'), 
-            Recall(average='macro')
-        ]
-
     learner = residual_tabular_learner(
         dls, 
         layers=list(shape), 

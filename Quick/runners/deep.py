@@ -36,6 +36,7 @@ from .utils import (
 
 from ..constants.runners import (
     DEFAULT_CALLBACKS,
+    DEFAULT_METRICS,
     DEFAULT_PROCS,
     ONE_CYCLE,
     VALLEY
@@ -58,7 +59,7 @@ def run_deep_nn_experiment(
     leave_out: list = [],
     epochs: int = 10,
     batch_size: int = 64,
-    metrics: list or None = None,
+    metrics: list = DEFAULT_METRICS,
     callbacks: list = DEFAULT_CALLBACKS,
     lr_choice: str = VALLEY,
     name: str or None = None,
@@ -129,17 +130,6 @@ def run_deep_nn_experiment(
     to = dls.tabular_object
 
     X_train, X_test, y_train, y_test = create_splits_from_tabular_object(to)
-
-    if metrics is None:
-        metrics = [
-            accuracy, 
-            BalancedAccuracy(), 
-            RocAuc(), 
-            MatthewsCorrCoef(), 
-            F1Score(average='macro'), 
-            Precision(average='macro'), 
-            Recall(average='macro')
-        ]
 
     learner = tabular_learner(
         dls, 

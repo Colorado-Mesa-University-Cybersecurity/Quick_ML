@@ -45,6 +45,7 @@ from .wrappers import SklearnWrapper
 
 from ..constants.runners import (
     DEFAULT_CALLBACKS,
+    DEFAULT_METRICS,
     DEFAULT_PROCS,
     FLAT_COS,
     VALLEY
@@ -68,7 +69,7 @@ def run_tabnet_experiment(
     epochs: int = 10,
     steps: int = 1,
     batch_size: int = 64,
-    metrics: list or None = None,
+    metrics: list = DEFAULT_METRICS,
     attention_size: int = 16,
     attention_width: int = 16,
     callbacks: list = DEFAULT_CALLBACKS,
@@ -146,17 +147,6 @@ def run_tabnet_experiment(
     to = dls.tabular_object
 
     X_train, X_test, y_train, y_test = create_splits_from_tabular_object(to)
-
-    if metrics is None:
-        metrics = [
-            accuracy, 
-            BalancedAccuracy(), 
-            RocAuc(), 
-            MatthewsCorrCoef(), 
-            F1Score(average='macro'), 
-            Precision(average='macro'), 
-            Recall(average='macro')
-        ]
     
     emb_szs = get_emb_sz(to)
 
