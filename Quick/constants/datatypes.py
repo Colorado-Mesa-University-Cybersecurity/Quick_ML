@@ -24,3 +24,14 @@ COMPONENT_TYPE_SCHEMA = [
     'Components',
     'n_components'
 ]
+
+TOPOLOGICAL_TYPE_SCHEMA = [
+    *BASE_TYPE_SCHEMA,
+    'clouds', 
+    'clouds_y', 
+    'clouds_y_decoded', 
+    'persistence', 
+    'features', 
+    'Xy'
+    'fig', 
+]
