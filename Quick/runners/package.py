@@ -75,7 +75,7 @@ def transform_and_split_data(
     # we add a target_type_ attribute to our model so yellowbrick knows how to make the visualizations
     classes: list = get_classes_from_dls(dls)
 
-    model.target_type_ = get_target_type(classes)
+    model.target_type_ = get_target_type(classes, allow_single=True)
     model._target_labels = target_label
 
     p = pathlib.Path(file_name)
