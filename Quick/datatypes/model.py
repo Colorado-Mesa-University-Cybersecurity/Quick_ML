@@ -51,7 +51,18 @@ class ModelData(NamedTuple):
     model_type: str
     
     def __str__(self):
-        return f"ModelData(name={self.name}, model={self.model}, classes={self.classes}, X_train={self.X_train}, y_train={self.y_train}, X_test={self.X_test}, y_test={self.y_test}, to={self.to}, dls={self.dls}, model_type={self.model_type})"
+        return f"""ModelData(
+            name={self.name}, 
+            model={self.model}, 
+            classes={self.classes}, 
+            X_train={self.X_train}, 
+            y_train={self.y_train}, 
+            X_test={self.X_test}, 
+            y_test={self.y_test}, 
+            to={self.to}, 
+            dls={self.dls}, 
+            model_type={self.model_type}
+        )"""
     
     def __repr__(self):
         return self.__str__()
@@ -85,7 +96,10 @@ class ModelDatum(NamedTuple):
     results: dict
 
     def __str__(self):
-        return f"ModelDatum(models={self.models}, results={self.results})"
+        return f"""ModelDatum(
+            models={self.models}, 
+            results={self.results}
+        )"""
     
     def __repr__(self):
         return self.__str__()
