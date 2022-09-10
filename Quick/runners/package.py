@@ -94,8 +94,6 @@ def transform_and_split_data(
         name
     )
 
-    # Now that the classifier has been created and trained, we pass out our training values
-    # for analysis and further experimentation
     return model_data
 
     
