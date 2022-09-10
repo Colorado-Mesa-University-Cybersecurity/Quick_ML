@@ -48,12 +48,19 @@ from fast_tabnet.core import (
 )
 
 from .utils import (
-    create_feature_sets
+    create_dataloaders,
+    create_feature_sets,
+    create_splits_from_tabular_object,
+    get_classes_from_dls,
+    get_target_type
 )
 
 from .wrappers import SklearnWrapper
 
-from ..constants.random import SEED
+from ..constants.runners import (
+    LEARNING_RATE_OPTIONS,
+    VALLEY
+)
 
 from ..datatypes.model import (
     Model_data,
@@ -67,7 +74,7 @@ def run_tabnet_experiment(
     df: pd.DataFrame, 
     file_name: str, 
     target_label: str, 
-    split=0.2, 
+    split: float = 0.2, 
     name: str or None = None,
     categorical: list = ['Protocol'],
     procs = [FillMissing, Categorify, Normalize], 
@@ -79,7 +86,7 @@ def run_tabnet_experiment(
     attention_size: int = 16,
     attention_width: int = 16,
     callbacks: list = [ShowGraphCallback],
-    lr_choice: str = 'valley',
+    lr_choice: str = VALLEY,
     fit_choice: str = 'flat_cos',
     no_bar: bool = False
 ) -> Model_data or ModelData:
@@ -131,10 +138,7 @@ def run_tabnet_experiment(
     if name is None:
         name = f"TabNet_steps_{steps}_width_{attention_width}_attention_{attention_size}"
 
-    lr_choice = {'valley': 0, 'slide': 1, 'steep': 2, 'minimum': 3}[lr_choice]
-        
-    if metrics is None:
-        metrics = [accuracy, BalancedAccuracy(), RocAuc(), MatthewsCorrCoef(), F1Score(average='macro'), Precision(average='macro'), Recall(average='macro')]
+    lr_choice: int = LEARNING_RATE_OPTIONS[lr_choice]
 
     categorical_features, continuous_features = create_feature_sets(
         df, 
@@ -143,37 +147,39 @@ def run_tabnet_experiment(
         categorical = categorical
     )
 
-    splits = RandomSplitter(valid_pct=split, seed=SEED)(range_of(df))
-    
-    # The dataframe is loaded into a fastai datastructure now that 
-    # the feature engineering pipeline has been set up
-
-    to = TabularPandas(
-        df            , y_names=target_label                , 
-        splits=splits , cat_names=categorical_features ,
-        procs=procs   , cont_names=continuous_features , 
+    dls = create_dataloaders(
+        df,
+        target_label,
+        categorical_features,
+        continuous_features,
+        procs,
+        batch_size,
+        split
     )
 
-    # The dataframe is then converted into a fastai dataset
-    try:
-        dls = to.dataloaders(bs=batch_size)
-    except:
-        dls = to
-    
-    # extract the file_name from the path
-    p = pathlib.Path(file_name)
-    file_name: str = str(p.parts[-1])
+    to = dls.tabular_object
 
+    X_train, X_test, y_train, y_test = create_splits_from_tabular_object(to)
+
+    if metrics is None:
+        metrics = [
+            accuracy, 
+            BalancedAccuracy(), 
+            RocAuc(), 
+            MatthewsCorrCoef(), 
+            F1Score(average='macro'), 
+            Precision(average='macro'), 
+            Recall(average='macro')
+        ]
+    
     emb_szs = get_emb_sz(to)
 
     net = TabNet(emb_szs, len(to.cont_names), dls.c, n_d=attention_width, n_a=attention_size, n_steps=steps) 
     tab_model = Learner(dls, net, loss_func=CrossEntropyLossFlat(), metrics=metrics, opt_func=ranger, cbs=callbacks)
 
-
     with tab_model.no_bar() if no_bar else contextlib.ExitStack() as gs:
 
         lr = tab_model.lr_find(suggest_funcs=[valley, slide, steep, minimum])
-
 
         # fitting functions, they give different results, some networks perform better with different learning schedule during fitting
         if(fit_choice == 'fit'):
@@ -185,37 +191,37 @@ def run_tabnet_experiment(
         else:
             assert False, f'{fit_choice} is not a valid fit_choice'
 
-
         tab_model.recorder.plot_sched() 
         results = tab_model.validate()
         interp = ClassificationInterpretation.from_learner(tab_model)
         interp.plot_confusion_matrix()
-                
 
-    tab_model.save(f'{file_name}.model')
     print(f'loss: {results[0]}, accuracy: {results[1]*100: .2f}%')
+    tab_model.save(f'{file_name}.model')
 
-
-    X_train = to.train.xs.reset_index(drop=True)
-    X_test = to.valid.xs.reset_index(drop=True)
-    y_train = to.train.ys.values.ravel()
-    y_test = to.valid.ys.values.ravel()
-
+    # we add a target_type_ attribute to our model so yellowbrick knows how to make the visualizations
+    classes = get_classes_from_dls(dls)
     wrapped_model = SklearnWrapper(tab_model)
 
-    classes = list(tab_model.dls.vocab)
-    if len(classes) == 2:
-        wrapped_model.target_type_ = 'binary'
-    elif len(classes) > 2:  
-        wrapped_model.target_type_ = 'multiclass'
-    else:
-        print('Must be more than one class to perform classification')
-        raise ValueError('Wrong number of classes')
-    
+    wrapped_model.target_type_ = get_target_type(classes)
     wrapped_model._target_labels = target_label
     
-    model_data: Model_data = Model_data(file_name, wrapped_model, classes, X_train, y_train, X_test, y_test, to, dls, name)
+    # extract the file_name from the path
+    p = pathlib.Path(file_name)
+    file_name: str = str(p.parts[-1])
 
+    model_data: Model_data = Model_data(
+        file_name, 
+        wrapped_model, 
+        classes, 
+        X_train, 
+        y_train, 
+        X_test, 
+        y_test, 
+        to, 
+        dls, 
+        name
+    )
 
     return model_data
 

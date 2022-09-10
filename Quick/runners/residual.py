@@ -63,7 +63,7 @@ def run_residual_deep_nn_experiment(
     file_name: str, 
     target_label: str, 
     shape: tuple, 
-    split=0.2, 
+    split: float = 0.2, 
     categorical: list = ['Protocol'],
     procs = [FillMissing, Categorify, Normalize], 
     leave_out: list = [],
@@ -187,7 +187,6 @@ def run_residual_deep_nn_experiment(
         interp = ClassificationInterpretation.from_learner(learner)
         interp.plot_confusion_matrix()
                 
-
     print(f'loss: {results[0]}, accuracy: {results[1]*100: .2f}%')
     learner.save(f'{file_name}.model')
 
