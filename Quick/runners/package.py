@@ -25,19 +25,10 @@ from .utils import (
     get_target_type
 )
 
-from .wrappers import SklearnWrapper
-
-from ..constants.runners import (
-    LEARNING_RATE_OPTIONS,
-    VALLEY
-)
-
 from ..datatypes.model import (
     Model_data,
     ModelData
 )
-
-from ..models.learners import residual_tabular_learner
 
 
 def transform_and_split_data(
