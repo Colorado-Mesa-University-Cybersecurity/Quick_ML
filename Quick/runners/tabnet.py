@@ -2,7 +2,7 @@
 
 '''
 
-import contextlib, pathlib
+import pathlib
 
 import fastai
 import fast_tabnet
@@ -11,14 +11,6 @@ import pandas as pd
 from collections import ChainMap
 
 from fastai.optimizer import ranger
-
-from fastai.callback.all import (
-    ShowGraphCallback,
-    minimum,
-    slide,
-    steep,
-    valley
-)
 
 from fastai.metrics import (
     BalancedAccuracy,
@@ -30,17 +22,10 @@ from fastai.metrics import (
 )
 
 from fastai.tabular.all import (
-    Categorify,
-    ClassificationInterpretation, 
     CrossEntropyLossFlat,
-    FillMissing, 
     Learner,
-    Normalize,
-    RandomSplitter,
-    TabularPandas,
     accuracy,
-    get_emb_sz,
-    range_of
+    get_emb_sz
 )
 
 from fast_tabnet.core import (
@@ -62,7 +47,6 @@ from ..constants.runners import (
     DEFAULT_CALLBACKS,
     DEFAULT_PROCS,
     FLAT_COS,
-    LEARNING_RATE_OPTIONS,
     VALLEY
 )
 
@@ -70,8 +54,6 @@ from ..datatypes.model import (
     Model_data,
     ModelData
 )
-
-from ..models.learners import residual_tabular_learner
 
 
 def run_tabnet_experiment(

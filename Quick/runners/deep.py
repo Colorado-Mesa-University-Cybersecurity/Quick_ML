@@ -2,20 +2,12 @@
 
 '''
 
-import contextlib, pathlib
+import pathlib
 
 import fastai
 import pandas as pd
 
 from collections import ChainMap
-
-from fastai.callback.all import (
-    ShowGraphCallback,
-    minimum,
-    slide,
-    steep,
-    valley
-)
 
 from fastai.metrics import (
     BalancedAccuracy,
@@ -27,13 +19,11 @@ from fastai.metrics import (
 )
 
 from fastai.tabular.all import (
-    Categorify,
-    ClassificationInterpretation, 
-    FillMissing, 
-    Normalize,
     accuracy,
     tabular_learner
 )
+
+from .wrappers import SklearnWrapper
 
 from .utils import (
     create_dataloaders,
@@ -43,8 +33,6 @@ from .utils import (
     get_target_type,
     run_model
 )
-
-from .wrappers import SklearnWrapper
 
 from ..constants.runners import (
     DEFAULT_CALLBACKS,
@@ -57,7 +45,6 @@ from ..datatypes.model import (
     Model_data,
     ModelData
 )
-
 
 
 def run_deep_nn_experiment(

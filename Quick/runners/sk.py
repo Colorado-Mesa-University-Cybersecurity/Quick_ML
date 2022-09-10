@@ -2,7 +2,7 @@
 
 '''
 
-import contextlib, pathlib
+import pathlib
 
 import fastai
 import pandas as pd
@@ -12,22 +12,12 @@ from collections import ChainMap
 
 from sklearn.neighbors import KNeighborsClassifier
 
-from fastai.tabular.all import (
-    Categorify,
-    FillMissing, 
-    Normalize,
-    RandomSplitter,
-    TabularPandas,
-    range_of,
-    tabular_learner
-)
-
 from sklearn.metrics import (
     accuracy_score, 
     classification_report
 )
 
-from Quick.constants.runners import DEFAULT_PROCS 
+from ..constants.runners import DEFAULT_PROCS 
 
 from .utils import (
     create_dataloaders,
@@ -36,8 +26,6 @@ from .utils import (
     get_classes_from_dls,
     get_target_type
 )
-
-from ..constants.random import SEED
 
 from ..datatypes.model import (
     Model_data,
