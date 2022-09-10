@@ -9,7 +9,6 @@ import pandas as pd
 
 from collections import ChainMap
 
-
 from fastai.tabular.all import (
     Categorify,
     FillMissing, 
@@ -85,7 +84,6 @@ def transform_and_split_data(
     p = pathlib.Path(file_name)
     file_name: str = str(p.parts[-1])
 
-        
     model_data: Model_data = Model_data(
         file_name, 
         model, 
