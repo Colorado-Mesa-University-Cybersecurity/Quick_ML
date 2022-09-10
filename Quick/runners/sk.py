@@ -27,6 +27,10 @@ from sklearn.metrics import (
     classification_report
 ) 
 
+from .utils import (
+    create_feature_sets
+)
+
 from ..constants.random import SEED
 
 from ..datatypes.model import (
@@ -37,11 +41,11 @@ from ..datatypes.model import (
 
 def run_sk_experiment(
     df: pd.DataFrame, 
-    name: str, 
     target_label: str, 
     split: float = 0.2,
     batch_size: int = 64, 
     categorical : list = ['Protocol'], 
+    name: str or None = None,
     leave_out: list = [], 
     model = KNeighborsClassifier()
 ) -> Model_data or ModelData:
@@ -52,24 +56,17 @@ def run_sk_experiment(
 
     # First we split the features into the dependent variable and 
     # continous and categorical features
-    dep_var: str = target_label
     print(df.shape)
 
+    if name is None:
+        name = f'SKLearn Classifier: {model.__name__}'
  
-    categorical_features: list = []
-    untouched_features  : list = []
-
-
-    for x in categorical:
-        if x in df.columns:
-            categorical_features.append(x)
-
-    for x in leave_out:
-        if x in df.columns:
-            untouched_features.append(x)
-        
-    continuous_features = list(set(df) - set(categorical_features) - set([dep_var]) - set(untouched_features))
-
+    categorical_features, continuous_features = create_feature_sets(
+        df, 
+        target_label, 
+        leave_out = leave_out, 
+        categorical = categorical
+    )
 
     # Next, we set up the feature engineering pipeline, namely filling missing values
     # encoding categorical features, and normalizing the continuous features
@@ -82,9 +79,9 @@ def run_sk_experiment(
     # The dataframe is loaded into a fastai datastructure now that 
     # the feature engineering pipeline has been set up
     to = TabularPandas(
-        df            , y_names=dep_var                , 
-        splits=splits , cat_names=categorical_features ,
-        procs=procs   , cont_names=continuous_features , 
+        df           , y_names=target_label          , 
+        splits=splits, cat_names=categorical_features,
+        procs=procs  , cont_names=continuous_features, 
     )
 
 

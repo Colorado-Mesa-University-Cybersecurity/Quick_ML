@@ -37,6 +37,10 @@ from fastai.tabular.all import (
     range_of
 )
 
+from .utils import (
+    create_feature_sets
+)
+
 from .wrappers import SklearnWrapper
 
 from ..constants.random import SEED
@@ -120,24 +124,15 @@ def run_residual_deep_nn_experiment(
 
     lr_choice = {'valley': 0, 'slide': 1, 'steep': 2, 'minimum': 3}[lr_choice]
 
-
-    categorical_features: list = []
-    untouched_features  : list = []
-
-    for x in leave_out:
-        if x in df.columns:
-            untouched_features.append(x)
-
-    for x in categorical:
-        if x in df.columns:
-            categorical_features.append(x)
-
-        
     if metrics is None:
         metrics = [accuracy, BalancedAccuracy(), RocAuc(), MatthewsCorrCoef(), F1Score(average='macro'), Precision(average='macro'), Recall(average='macro')]
 
-
-    continuous_features = list(set(df) - set(categorical_features) - set([target_label]) - set(untouched_features))
+    categorical_features, continuous_features = create_feature_sets(
+        df, 
+        target_label, 
+        leave_out = leave_out, 
+        categorical = categorical
+    )
 
     splits = RandomSplitter(valid_pct=split, seed=SEED)(range_of(df))
     
