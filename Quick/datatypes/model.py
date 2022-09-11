@@ -47,7 +47,7 @@ class ModelData(NamedTuple):
     X_test: np.ndarray
     y_test: np.ndarray
     to: TabularPandas
-    dls: Union(DataLoader, DataLoaders)
+    dls: Union[DataLoader, DataLoaders]
     model_type: str
     
     def __str__(self):

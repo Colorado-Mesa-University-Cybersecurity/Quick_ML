@@ -18,18 +18,27 @@ MODEL_TYPE_SCHEMA = [
     'dls'   
 ]
 
-COMPONENT_TYPE_SCHEMA = [
-    *BASE_TYPE_SCHEMA,
+COMPONENT_BASE_TYPE_SCHEMA = [
     'Xy',
     'Components',
     'n_components'
 ]
 
-TOPOLOGICAL_TYPE_SCHEMA = [
+
+COMPONENT_TYPE_SCHEMA = [
+    *BASE_TYPE_SCHEMA,
+    *COMPONENT_BASE_TYPE_SCHEMA
+]
+
+CLOUD_TYPE_SCHEMA = [
     *BASE_TYPE_SCHEMA,
     'clouds', 
     'clouds_y', 
     'clouds_y_decoded', 
+]
+
+TOPOLOGICAL_TYPE_SCHEMA = [
+    *BASE_TYPE_SCHEMA,
     'persistence', 
     'features', 
     'Xy'
