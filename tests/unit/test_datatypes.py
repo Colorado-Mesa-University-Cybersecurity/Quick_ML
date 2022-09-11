@@ -5,12 +5,13 @@ import pprint
 # from .tunnel import *
 import tunnel
 
-from tests.unit.contants import (
+from tests.unit.constants.datatypes import (
     SAMPLE_BASE_TYPE_DATA
 )
 
-pretty = pprint.PrettyPrinter(indent=4, width=30).pprint
-
+from tests.unit.utils.printer import (
+    pretty
+)
 
 from Quick.datatypes.base import *
 
