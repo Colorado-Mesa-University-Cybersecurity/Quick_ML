@@ -30,6 +30,10 @@ def load_data(filePath):
 
     p = pathlib.Path(filePath)
     filePathClean: str = str(p.parts[-1])
+    # check to see if ./cache/ directory exists
+    if not os.path.exists('./cache/'):
+        os.mkdir('./cache/')
+
     pickleDump: str = f'./cache/{filePathClean}.pickle'
 
     print(f'Loading Dataset: {filePath}')
