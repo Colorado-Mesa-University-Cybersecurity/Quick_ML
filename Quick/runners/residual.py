@@ -36,6 +36,7 @@ from .utils import (
 from ..constants.runners import (
     DEFAULT_CALLBACKS,
     DEFAULT_PROCS,
+    DEFAULT_METRICS,
     ONE_CYCLE,
     VALLEY
 )
@@ -51,13 +52,13 @@ def run_residual_deep_nn_experiment(
     file_name: str, 
     target_label: str, 
     shape: tuple, 
-    split: float = 0.2, 
+    split: float = 0.2,  
     categorical: list = ['Protocol'],
     procs = DEFAULT_PROCS, 
     leave_out: list = [],
     epochs: int = 10,
     batch_size: int = 64,
-    metrics: list or None = None,
+    metrics: list or None = DEFAULT_METRICS,
     callbacks: list = DEFAULT_CALLBACKS,
     lr_choice: str = VALLEY,
     name: str or None = None,

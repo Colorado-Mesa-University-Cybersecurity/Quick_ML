@@ -7,7 +7,7 @@ import numpy as np
 import sklearn
 
 from collections import ChainMap
-from sklearn import BaseEstimator
+from sklearn.base import BaseEstimator
 from sklearn.metrics import accuracy_score
 
 class SklearnWrapper(BaseEstimator):

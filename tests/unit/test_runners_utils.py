@@ -91,7 +91,7 @@ def test_create_cv_dataloaders(mocker, n: int):
         A test for the create_cv_dataloaders function.
     '''
 
-    k_folds = 2
+    k_folds = 2 
     SEED = 14
     df = SAMPLE_DATAFRAME
     target_label = SAMPLE_TARGET_LABEL

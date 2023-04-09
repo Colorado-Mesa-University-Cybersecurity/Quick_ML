@@ -11,8 +11,13 @@ from .utils import (
     clean_data, 
     features_with_bad_values, 
     load_data 
-) 
+)
 
+from Quick.constants.cleaning import (
+    FILE,
+    DATASET,
+    STATS
+)
 
 
 def examine_dataset(job_id: int, files: str, datasets: str) -> ChainMap:
@@ -53,9 +58,9 @@ def examine_dataset(job_id: int, files: str, datasets: str) -> ChainMap:
     #     performing experiments, so we can keep track of the history and do not need to reload
     #     the dataset.
     data_summary: ChainMap =  ChainMap({
-        'File':             files[job_id],
-        'Dataset':          df,
-        'Feature_stats':    features_with_bad_values(df, files[job_id]), 
+        FILE:             files[job_id],
+        DATASET:          df,
+        STATS:    features_with_bad_values(df, files[job_id]), 
     })
     
     return data_summary
