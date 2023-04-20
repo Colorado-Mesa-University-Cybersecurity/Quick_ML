@@ -8,6 +8,7 @@ import torch
 
 from fastai.tabular.data import TabularPandas
 from fastai.data.core import DataLoaders
+from fastcore.transform import Transform
 from torch.utils.data import DataLoader
 
 from collections import (
@@ -17,10 +18,13 @@ from collections import (
 
 from typing import (
     Any,
+    Dict,
     List,
     NamedTuple,
     Union
 )
+
+DataTransform = List[Transform]
 
 Model_data = namedtuple(
     'model_data', 

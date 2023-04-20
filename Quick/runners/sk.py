@@ -41,7 +41,7 @@ def run_sk_experiment(
     batch_size: int = 64, 
     categorical : list = ['Protocol'], 
     procs = DEFAULT_PROCS, 
-    name: str or None = None,
+    name: str or None = 'K-Nearest Neighbors',
     leave_out: list = [], 
     model = KNeighborsClassifier()
 ) -> Model_data or ModelData:
@@ -53,7 +53,7 @@ def run_sk_experiment(
     print(f"Shape of Input Data: {df.shape}")
 
     if name is None:
-        name = f'SKLearn Classifier: {model.__name__}'
+        name = f'SKLearn Classifier: {name}'
  
     categorical_features, continuous_features = create_feature_sets(
         df, 
@@ -110,6 +110,7 @@ def import_versions() -> ChainMap:
     '''
         Function will give a map of the versions of the imports used in this file
     '''
+    
     versions: ChainMap = ChainMap({
         'fastai': f'\t\t{fastai.__version__}',
         'pandas': f'\t\t{pd.__version__}',

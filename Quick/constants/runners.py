@@ -23,6 +23,8 @@ from fastai.tabular.all import (
     accuracy
 )
 
+from ..datatypes.model import DataTransform
+
 
 FIT: str = 'fit'
 ONE_CYCLE: str = 'one_cycle'
@@ -44,7 +46,7 @@ DEFAULT_CALLBACKS: list = [
     ShowGraphCallback
 ]
 
-DEFAULT_PROCS: list = [
+DEFAULT_PROCS: DataTransform = [
     FillMissing, 
     Categorify, 
     Normalize
