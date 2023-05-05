@@ -50,7 +50,7 @@ def load_data(filePath):
         df.to_pickle(pickleDump)
     
     return df
-
+ 
 
 def features_with_bad_values(df: pd.DataFrame, datasetName: str) -> pd.DataFrame:
     '''
